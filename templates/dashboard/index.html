@@ -1,0 +1,334 @@
+{% extends "layout.html" %}
+
+{% block page_title %}Advanced Analytics Dashboard{% endblock %}
+{% block page_subtitle %}Comprehensive overview, P&L, and product performance metrics{% endblock %}
+
+{% block content %}
+<div class="row g-4 mb-4">
+    <!-- Stat Cards -->
+    <div class="col-md-3">
+        <a href="{{ url_for('products.index') }}" class="text-decoration-none text-white">
+            <div class="glass-card p-4 d-flex align-items-center justify-content-between h-100 border-start border-primary border-4" style="transition: transform 0.3s; cursor: pointer;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+                <div>
+                    <h6 class="text-secondary mb-1">Total Products</h6>
+                    <h3 class="fw-bold mb-0">{{ total_products }}</h3>
+                </div>
+                <div class="p-3 rounded-circle" style="background: rgba(79, 70, 229, 0.15); color: #818cf8;">
+                    <i class="bi bi-box fs-4"></i>
+                </div>
+            </div>
+        </a>
+    </div>
+    
+    <div class="col-md-3">
+        <a href="{{ url_for('sales.index') }}" class="text-decoration-none text-white">
+            <div class="glass-card p-4 d-flex align-items-center justify-content-between h-100 border-start border-success border-4" style="transition: transform 0.3s; cursor: pointer;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+                <div>
+                    <h6 class="text-secondary mb-1">Total Sales</h6>
+                    <h3 class="fw-bold mb-0">${{ "%.2f"|format(total_sales) }}</h3>
+                </div>
+                <div class="p-3 rounded-circle" style="background: rgba(16, 185, 129, 0.15); color: #34d399;">
+                    <i class="bi bi-currency-dollar fs-4"></i>
+                </div>
+            </div>
+        </a>
+    </div>
+    
+    <div class="col-md-3">
+        <a href="{{ url_for('products.index', low_stock=1) }}" class="text-decoration-none text-white">
+            <div class="glass-card p-4 d-flex align-items-center justify-content-between h-100 border-start border-warning border-4" style="transition: transform 0.3s; cursor: pointer;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+                <div>
+                    <h6 class="text-secondary mb-1">Low Stock Alerts</h6>
+                    <h3 class="fw-bold mb-0 text-warning">{{ low_stock_count }}</h3>
+                </div>
+                <div class="p-3 rounded-circle position-relative" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24;">
+                    <i class="bi bi-exclamation-triangle fs-4"></i>
+                    {% if low_stock_count > 0 %}
+                    <span class="position-absolute top-0 start-100 translate-middle p-2 bg-danger border border-dark rounded-circle animate-pulse"></span>
+                    {% endif %}
+                </div>
+            </div>
+        </a>
+    </div>
+    
+    <div class="col-md-3">
+        <a href="{{ url_for('purchases.index') }}" class="text-decoration-none text-white">
+            <div class="glass-card p-4 d-flex align-items-center justify-content-between h-100 border-start border-info border-4" style="transition: transform 0.3s; cursor: pointer;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+                <div>
+                    <h6 class="text-secondary mb-1">Pending Orders</h6>
+                    <h3 class="fw-bold mb-0">{{ pending_orders }}</h3>
+                </div>
+                <div class="p-3 rounded-circle" style="background: rgba(14, 165, 233, 0.15); color: #38bdf8;">
+                    <i class="bi bi-truck fs-4"></i>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<!-- Main Charts Row -->
+<div class="row g-4 mb-4">
+    <!-- Sales & P/L Chart -->
+    <div class="col-lg-8">
+        <div class="glass-card p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="fw-bold text-white mb-0">Profit & Loss (Last 7 Days)</h5>
+                <span class="badge bg-primary bg-opacity-25 text-primary px-3 py-2 rounded-pill"><i class="bi bi-graph-up me-1"></i> Revenue vs Cost</span>
+            </div>
+            <div style="height: 350px;">
+                <canvas id="plChart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Best Selling Products -->
+    <div class="col-lg-4">
+        <div class="glass-card p-4 h-100">
+            <h5 class="fw-bold text-white mb-4">Top 5 Best-Selling Products</h5>
+            <div style="height: 350px;">
+                <canvas id="topProductsChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Secondary Charts Row -->
+<div class="row g-4 mb-4">
+    <!-- Category Distribution -->
+    <div class="col-lg-4">
+        <div class="glass-card p-4 h-100 d-flex flex-column">
+            <h5 class="fw-bold text-white mb-4">Stock by Category</h5>
+            <div class="d-flex justify-content-center align-items-center flex-grow-1" style="min-height: 250px;">
+                <canvas id="stockChart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Category Fast Sellers Comparison -->
+    <div class="col-lg-4">
+        <div class="glass-card p-4 h-100 d-flex flex-column">
+            <h5 class="fw-bold text-white mb-2">Fastest Movers</h5>
+            <div class="text-secondary small mb-4">Comparison in top category: {{ top_category_name }}</div>
+            <div class="flex-grow-1" style="min-height: 250px;">
+                <canvas id="compareChart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Supplier Cost Analysis -->
+    <div class="col-lg-4">
+        <div class="glass-card p-4 h-100 d-flex flex-column">
+            <h5 class="fw-bold text-white mb-2">Supplier Cost Analysis</h5>
+            <div class="text-secondary small mb-4">Average Purchase Cost per Unit</div>
+            <div class="flex-grow-1" style="min-height: 250px;">
+                <canvas id="supplierChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const getChartColor = () => document.documentElement.getAttribute('data-theme') === 'light' ? '#475569' : '#94a3b8';
+        const getGridColor = () => document.documentElement.getAttribute('data-theme') === 'light' ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)';
+        
+        Chart.defaults.color = getChartColor();
+        Chart.defaults.font.family = "'Inter', sans-serif";
+        
+        let delayed;
+        const animationConfig = {
+            onComplete: () => { delayed = true; },
+            delay: (context) => {
+                let delay = 0;
+                if (context.type === 'data' && context.mode === 'default' && !delayed) {
+                    delay = context.dataIndex * 150 + context.datasetIndex * 100;
+                }
+                return delay;
+            },
+        };
+        
+        const chartInstances = [];
+        
+        // 1. Profit & Loss Chart (Line + Bar combo)
+        const plChart = new Chart(document.getElementById('plChart'), {
+            type: 'line',
+            data: {
+                labels: {{ profit_labels|safe }},
+                datasets: [
+                    {
+                        type: 'line',
+                        label: 'Gross Revenue ($)',
+                        data: {{ revenue_data|safe }},
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true,
+                        yAxisID: 'y'
+                    },
+                    {
+                        type: 'bar',
+                        label: 'Purchase Costs ($)',
+                        data: {{ cost_data|safe }},
+                        backgroundColor: 'rgba(239, 68, 68, 0.8)',
+                        borderRadius: 4,
+                        yAxisID: 'y'
+                    }
+                ]
+            },
+            options: {
+                animation: animationConfig,
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'top' } },
+                scales: {
+                    y: { grid: { color: getGridColor() }, beginAtZero: true },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+        chartInstances.push(plChart);
+
+        // 2. Best Selling Products (Horizontal Bar)
+        const topProductsChart = new Chart(document.getElementById('topProductsChart'), {
+            type: 'bar',
+            data: {
+                labels: {{ top_products_labels|safe }},
+                datasets: [{
+                    label: 'Units Sold',
+                    data: {{ top_products_data|safe }},
+                    backgroundColor: 'rgba(129, 140, 248, 0.8)',
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                animation: animationConfig,
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { grid: { display: false } },
+                    x: { grid: { color: getGridColor() }, beginAtZero: true }
+                }
+            }
+        });
+        chartInstances.push(topProductsChart);
+
+        // 3. Stock Distribution (Doughnut)
+        const stockChart = new Chart(document.getElementById('stockChart'), {
+            type: 'doughnut',
+            data: {
+                labels: {{ stock_labels|safe }},
+                datasets: [{
+                    data: {{ stock_data|safe }},
+                    backgroundColor: ['#4f46e5', '#10b981', '#f59e0b', '#0ea5e9', '#ec4899', '#8b5cf6'],
+                    borderWidth: 0,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                animation: animationConfig,
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '75%',
+                plugins: {
+                    legend: { position: 'bottom', labels: { padding: 20, usePointStyle: true } }
+                }
+            }
+        });
+        chartInstances.push(stockChart);
+        
+        // 4. Category Comparison (Radar Chart)
+        const compareChart = new Chart(document.getElementById('compareChart'), {
+            type: 'radar',
+            data: {
+                labels: {{ compare_labels|safe }},
+                datasets: [{
+                    label: 'Units Sold',
+                    data: {{ compare_data|safe }},
+                    backgroundColor: 'rgba(236, 72, 153, 0.2)',
+                    borderColor: '#ec4899',
+                    pointBackgroundColor: '#ec4899',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: '#ec4899'
+                }]
+            },
+            options: {
+                animation: animationConfig,
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        angleLines: { color: getGridColor() },
+                        grid: { color: getGridColor() },
+                        pointLabels: { color: getChartColor(), font: { size: 10 } },
+                        ticks: { display: false }
+                    }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+        chartInstances.push(compareChart);
+        
+        // 5. Supplier Cost Analysis (Bar)
+        const supplierChart = new Chart(document.getElementById('supplierChart'), {
+            type: 'bar',
+            data: {
+                labels: {{ supplier_labels|safe }},
+                datasets: [{
+                    label: 'Avg Unit Cost ($)',
+                    data: {{ supplier_costs|safe }},
+                    backgroundColor: 'rgba(14, 165, 233, 0.8)',
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                animation: animationConfig,
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { grid: { color: getGridColor() }, beginAtZero: true },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+        chartInstances.push(supplierChart);
+
+        window.addEventListener('themeChanged', () => {
+            const newColor = getChartColor();
+            const newGridColor = getGridColor();
+            
+            Chart.defaults.color = newColor;
+            
+            chartInstances.forEach(chart => {
+                if(chart.options.scales) {
+                    if(chart.options.scales.x && chart.options.scales.x.grid.display !== false) chart.options.scales.x.grid.color = newGridColor;
+                    if(chart.options.scales.y && chart.options.scales.y.grid.display !== false) chart.options.scales.y.grid.color = newGridColor;
+                    if(chart.options.scales.r) {
+                        chart.options.scales.r.angleLines.color = newGridColor;
+                        chart.options.scales.r.grid.color = newGridColor;
+                        chart.options.scales.r.pointLabels.color = newColor;
+                    }
+                }
+                chart.update();
+            });
+        });
+    });
+</script>
+
+<style>
+    /* Add a subtle pulse animation for the critical alert */
+    @keyframes pulse-ring {
+        0% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+        70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+        100% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+    .animate-pulse {
+        animation: pulse-ring 2s infinite;
+    }
+</style>
+{% endblock %}

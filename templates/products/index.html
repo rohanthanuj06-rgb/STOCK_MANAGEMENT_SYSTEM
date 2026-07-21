@@ -1,0 +1,132 @@
+{% extends "layout.html" %}
+
+{% block page_title %}Products Directory{% endblock %}
+{% block page_subtitle %}Manage your inventory, pricing, and product details{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+        <!-- Search -->
+        <form method="GET" action="{{ url_for('products.index') }}" class="d-flex gap-2">
+            <div class="input-group" style="max-width: 300px;">
+                <span class="input-group-text bg-transparent border-end-0 premium-input border-secondary text-secondary" style="background: rgba(15, 23, 42, 0.6) !important;">
+                    <i class="bi bi-search"></i>
+                </span>
+                <input type="text" name="q" value="{{ query }}" class="form-control premium-input border-start-0 ps-0" placeholder="Search products..." style="background: rgba(15, 23, 42, 0.6) !important;" onchange="this.form.submit()">
+            </div>
+            <select name="category_id" class="form-select premium-input text-white" style="max-width: 200px; background: rgba(15, 23, 42, 0.6) !important;" onchange="this.form.submit()">
+                <option value="" class="text-dark">All Categories</option>
+                {% for cat in categories %}
+                    <option value="{{ cat.id }}" class="text-dark" {% if selected_category == cat.id|string %}selected{% endif %}>{{ cat.name }}</option>
+                {% endfor %}
+            </select>
+        </form>
+        
+        <!-- Actions -->
+        <div>
+            <button class="btn btn-outline-light me-2" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
+                <i class="bi bi-tags text-primary"></i> Add Category
+            </button>
+            <a href="{{ url_for('products.add') }}" class="btn premium-btn shadow">
+                <i class="bi bi-plus-lg me-1"></i> Add Product
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="glass-card p-0 overflow-hidden shadow-lg border-0 shadow">
+    <table class="table table-hover table-borderless text-white mb-0 align-middle">
+        <thead class="bg-dark bg-opacity-75">
+            <tr>
+                <th class="ps-4 py-3 fw-semibold text-secondary text-uppercase small" style="letter-spacing: 1px;">Product Info</th>
+                <th class="py-3 fw-semibold text-secondary text-uppercase small" style="letter-spacing: 1px;">Category</th>
+                <th class="py-3 fw-semibold text-secondary text-uppercase small" style="letter-spacing: 1px;">Price</th>
+                <th class="py-3 fw-semibold text-secondary text-uppercase small" style="letter-spacing: 1px;">Stock Status</th>
+                <th class="text-end pe-4 py-3 fw-semibold text-secondary text-uppercase small" style="letter-spacing: 1px;">Actions</th>
+            </tr>
+        </thead>
+        <tbody class="border-top border-secondary opacity-75">
+            {% for product in products %}
+            <tr style="transition: background-color 0.2s; cursor: pointer;" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.05)'" onmouseout="this.style.backgroundColor='transparent'">
+                <td class="ps-4 py-3">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-primary bg-opacity-25 rounded p-2 me-3 d-flex align-items-center justify-content-center border border-primary border-opacity-25" style="width: 48px; height: 48px;">
+                            <i class="bi bi-box text-primary fs-4"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-0 fw-bold">{{ product.name }}</h6>
+                            <small class="text-secondary opacity-75 d-flex align-items-center mt-1">
+                                <i class="bi bi-upc-scan me-1"></i> {{ product.sku }}
+                            </small>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <span class="badge bg-secondary bg-opacity-25 text-light border border-secondary border-opacity-50 px-3 py-2 rounded-pill fw-normal">
+                        {{ product.category.name if product.category else 'Uncategorized' }}
+                    </span>
+                </td>
+                <td>
+                    <strong class="fs-6 d-block">${{ "%.2f"|format(product.base_price) }}</strong>
+                </td>
+                <td>
+                    {% if product.stock_status == 'In Stock' %}
+                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-2 rounded-pill fw-normal d-inline-flex align-items-center"><i class="bi bi-check-circle-fill me-2"></i> In Stock ({{ product.available_stock }})</span>
+                    {% elif product.stock_status == 'Low Stock' %}
+                        <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-3 py-2 rounded-pill fw-normal d-inline-flex align-items-center"><i class="bi bi-exclamation-triangle-fill me-2"></i> Low Stock ({{ product.available_stock }})</span>
+                    {% else %}
+                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-3 py-2 rounded-pill fw-normal d-inline-flex align-items-center"><i class="bi bi-x-circle-fill me-2"></i> Out of Stock</span>
+                    {% endif %}
+                </td>
+                <td class="text-end pe-4">
+                    {% if product.stock_status in ['Low Stock', 'Out of Stock'] %}
+                    <a href="{{ url_for('purchases.add', product_id=product.id) }}" class="btn btn-sm btn-success bg-opacity-10 text-success border-success border-opacity-25 rounded-circle me-1" title="Restock Product"><i class="bi bi-cart-plus"></i></a>
+                    {% endif %}
+                    <button class="btn btn-sm btn-outline-light rounded-circle me-1 hover-bg-glass" title="Edit"><i class="bi bi-pencil"></i></button>
+                    <button class="btn btn-sm btn-outline-danger border-0 rounded-circle" title="Delete"><i class="bi bi-trash"></i></button>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5" class="text-center py-5 text-secondary">
+                    <div class="bg-secondary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="bi bi-box-seam fs-1 text-secondary opacity-75"></i>
+                    </div>
+                    <h5 class="fw-bold text-white mb-2">No products found</h5>
+                    <p class="mb-4">Get started by adding your first product to the inventory.</p>
+                    <a href="{{ url_for('products.add') }}" class="btn premium-btn">
+                        <i class="bi bi-plus-lg me-1"></i> Add Your First Product
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Add Category Modal -->
+<div class="modal fade" id="addCategoryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass-card border-0 shadow-lg" style="background: rgba(15, 23, 42, 0.95); box-shadow: 0 20px 40px rgba(0,0,0,0.4);">
+            <div class="modal-header border-bottom border-secondary border-opacity-50 px-4 py-3">
+                <h5 class="modal-title fw-bold">
+                    <i class="bi bi-tags text-primary me-2"></i> Add New Category
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ url_for('products.add_category') }}" method="POST">
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small text-uppercase fw-bold mb-2" style="letter-spacing: 1px;">Category Name</label>
+                        <input type="text" name="name" class="form-control premium-input shadow-sm" required placeholder="e.g. Electronics, Furniture">
+                    </div>
+                </div>
+                <div class="modal-footer border-top border-secondary border-opacity-50 px-4 py-3 bg-dark bg-opacity-50">
+                    <button type="button" class="btn btn-outline-secondary text-white" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn premium-btn shadow">Save Category</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

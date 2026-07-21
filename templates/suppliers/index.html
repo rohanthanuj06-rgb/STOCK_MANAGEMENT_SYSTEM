@@ -1,0 +1,86 @@
+{% extends "layout.html" %}
+
+{% block page_title %}Suppliers Directory{% endblock %}
+{% block page_subtitle %}Manage your vendor relations and contact details{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+        <!-- Search -->
+        <div class="input-group" style="max-width: 400px;">
+            <span class="input-group-text bg-transparent border-end-0 premium-input border-secondary text-secondary" style="background: rgba(15, 23, 42, 0.6) !important;">
+                <i class="bi bi-search"></i>
+            </span>
+            <input type="text" class="form-control premium-input border-start-0 ps-0" placeholder="Search suppliers..." style="background: rgba(15, 23, 42, 0.6) !important;">
+        </div>
+        
+        <!-- Actions -->
+        <div>
+            <a href="{{ url_for('suppliers.add') }}" class="btn premium-btn shadow">
+                <i class="bi bi-plus-lg me-1"></i> Add Supplier
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="glass-card p-0 overflow-hidden shadow-lg border-0 shadow">
+    <table class="table table-hover table-borderless text-white mb-0 align-middle">
+        <thead class="bg-dark bg-opacity-75">
+            <tr>
+                <th class="ps-4 py-3 fw-semibold text-secondary text-uppercase small" style="letter-spacing: 1px;">Supplier Name</th>
+                <th class="py-3 fw-semibold text-secondary text-uppercase small" style="letter-spacing: 1px;">Contact Info</th>
+                <th class="py-3 fw-semibold text-secondary text-uppercase small" style="letter-spacing: 1px;">Address</th>
+                <th class="text-end pe-4 py-3 fw-semibold text-secondary text-uppercase small" style="letter-spacing: 1px;">Actions</th>
+            </tr>
+        </thead>
+        <tbody class="border-top border-secondary opacity-75">
+            {% for supplier in suppliers %}
+            <tr style="transition: background-color 0.2s; cursor: pointer;" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.05)'" onmouseout="this.style.backgroundColor='transparent'">
+                <td class="ps-4 py-3">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-primary bg-opacity-25 rounded p-2 me-3 d-flex align-items-center justify-content-center border border-primary border-opacity-25" style="width: 48px; height: 48px;">
+                            <i class="bi bi-building text-primary fs-4"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-0 fw-bold">{{ supplier.name }}</h6>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="d-flex flex-column gap-1">
+                        {% if supplier.contact_email %}
+                        <span class="text-light fs-6"><i class="bi bi-envelope text-secondary me-2"></i>{{ supplier.contact_email }}</span>
+                        {% endif %}
+                        {% if supplier.contact_phone %}
+                        <span class="text-light fs-6"><i class="bi bi-telephone text-secondary me-2"></i>{{ supplier.contact_phone }}</span>
+                        {% endif %}
+                    </div>
+                </td>
+                <td>
+                    <span class="text-secondary">{{ supplier.address or 'N/A' }}</span>
+                </td>
+                <td class="text-end pe-4">
+                    <div class="btn-group shadow-sm">
+                        <button class="btn btn-sm btn-outline-secondary text-white hover-bg-glass" title="Edit"><i class="bi bi-pencil"></i></button>
+                        <button class="btn btn-sm btn-outline-danger hover-bg-glass" title="Delete"><i class="bi bi-trash"></i></button>
+                    </div>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="4" class="text-center py-5 text-secondary">
+                    <div class="bg-secondary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="bi bi-building fs-1 text-secondary opacity-75"></i>
+                    </div>
+                    <h5 class="fw-bold text-white mb-2">No suppliers found</h5>
+                    <p class="mb-4">Get started by adding your first supplier to the directory.</p>
+                    <a href="{{ url_for('suppliers.add') }}" class="btn premium-btn">
+                        <i class="bi bi-plus-lg me-1"></i> Add Supplier
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

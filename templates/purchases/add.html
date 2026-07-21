@@ -1,0 +1,57 @@
+{% extends "layout.html" %}
+
+{% block page_title %}New Purchase Order{% endblock %}
+{% block page_subtitle %}Order items from suppliers to replenish stock{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="glass-card p-5 border-0 shadow-lg border-start border-info border-4">
+            <form method="POST" action="{{ url_for('purchases.add') }}">
+                
+                <div class="row g-4 mb-4">
+                    <div class="col-md-12">
+                        <label class="form-label text-secondary small text-uppercase fw-bold mb-1" style="letter-spacing: 1px;">Supplier</label>
+                        <select name="supplier_id" class="form-select premium-input shadow-sm text-white" style="background-color: rgba(15, 23, 42, 0.6);" required>
+                            <option value="" class="text-dark">Select Supplier...</option>
+                            {% for supplier in suppliers %}
+                                <option value="{{ supplier.id }}" class="text-dark">{{ supplier.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row g-4 mb-5">
+                    <div class="col-md-5">
+                        <label class="form-label text-secondary small text-uppercase fw-bold mb-1" style="letter-spacing: 1px;">Select Product</label>
+                            <select class="form-select text-white" id="product_id" name="product_id" required style="background: rgba(15, 23, 42, 0.6) !important; border-color: rgba(255,255,255,0.1);">
+                                <option value="" class="text-dark">Select a Product</option>
+                                {% for product in products %}
+                                <option value="{{ product.id }}" class="text-dark" {% if selected_product_id == product.id|string %}selected{% endif %}>{{ product.name }} (SKU: {{ product.sku }})</option>
+                                {% endfor %}
+                            </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-secondary small text-uppercase fw-bold mb-1" style="letter-spacing: 1px;">Quantity</label>
+                        <input type="number" name="quantity" class="form-control premium-input shadow-sm" required min="1" value="10">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-secondary small text-uppercase fw-bold mb-1" style="letter-spacing: 1px;">Unit Cost</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0 premium-input text-secondary" style="background: rgba(15, 23, 42, 0.6) !important;">$</span>
+                            <input type="number" step="0.01" name="cost" class="form-control premium-input border-start-0 ps-0" required placeholder="0.00" style="background: rgba(15, 23, 42, 0.6) !important;">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex justify-content-end gap-3 mt-4 pt-4 border-top border-secondary border-opacity-50">
+                    <a href="{{ url_for('purchases.index') }}" class="btn btn-outline-secondary text-white px-4">Cancel</a>
+                    <button type="submit" class="btn btn-info text-dark px-5 shadow border-0" style="background: linear-gradient(135deg, #0ea5e9, #0284c7); color: white !important;">
+                        <i class="bi bi-inbox-fill me-1"></i> Generate PO
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

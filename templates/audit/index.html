@@ -1,0 +1,80 @@
+{% extends "layout.html" %}
+
+{% block page_title %}Stock Audit Logs{% endblock %}
+{% block page_subtitle %}Full history of all inventory movements and changes{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+        <!-- Search -->
+        <div class="input-group" style="max-width: 400px;">
+            <span class="input-group-text bg-transparent border-end-0 premium-input border-secondary text-secondary" style="background: rgba(15, 23, 42, 0.6) !important;">
+                <i class="bi bi-search"></i>
+            </span>
+            <input type="text" class="form-control premium-input border-start-0 ps-0" placeholder="Search logs..." style="background: rgba(15, 23, 42, 0.6) !important;">
+        </div>
+        
+        <!-- Actions -->
+        <div>
+            <button class="btn btn-outline-light me-2">
+                <i class="bi bi-download"></i> Export CSV
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="glass-card p-0 overflow-hidden shadow-lg border-0 shadow">
+    <table class="table table-hover table-borderless text-white mb-0 align-middle">
+        <thead class="bg-dark bg-opacity-75">
+            <tr>
+                <th class="ps-4 py-3 fw-semibold text-secondary text-uppercase small" style="letter-spacing: 1px;">Date & Time</th>
+                <th class="py-3 fw-semibold text-secondary text-uppercase small" style="letter-spacing: 1px;">Product</th>
+                <th class="py-3 fw-semibold text-secondary text-uppercase small" style="letter-spacing: 1px;">Change Type</th>
+                <th class="py-3 fw-semibold text-secondary text-uppercase small" style="letter-spacing: 1px;">Quantity</th>
+                <th class="py-3 fw-semibold text-secondary text-uppercase small" style="letter-spacing: 1px;">New Stock</th>
+                <th class="text-end pe-4 py-3 fw-semibold text-secondary text-uppercase small" style="letter-spacing: 1px;">User</th>
+            </tr>
+        </thead>
+        <tbody class="border-top border-secondary opacity-75">
+            {% for log in logs %}
+            <tr style="transition: background-color 0.2s; cursor: pointer;" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.05)'" onmouseout="this.style.backgroundColor='transparent'">
+                <td class="ps-4 py-3">
+                    <small class="text-light">{{ log.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</small>
+                </td>
+                <td><span class="fw-bold">{{ log.product.name }}</span> <small class="text-secondary opacity-75 d-block mt-1"><i class="bi bi-upc-scan me-1"></i> {{ log.product.sku }}</small></td>
+                <td>
+                    {% if log.change_type == 'Sale' %}
+                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-1 rounded-pill"><i class="bi bi-cart me-1"></i> Sale</span>
+                    {% elif log.change_type == 'Purchase' %}
+                        <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-3 py-1 rounded-pill"><i class="bi bi-truck me-1"></i> Purchase</span>
+                    {% else %}
+                        <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-3 py-1 rounded-pill"><i class="bi bi-pencil me-1"></i> {{ log.change_type }}</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if log.quantity_changed > 0 %}
+                        <strong class="text-success">+{{ log.quantity_changed }}</strong>
+                    {% else %}
+                        <strong class="text-danger">{{ log.quantity_changed }}</strong>
+                    {% endif %}
+                </td>
+                <td>{{ log.new_available_stock }}</td>
+                <td class="text-end pe-4">
+                    <span class="badge bg-secondary bg-opacity-25 text-light px-2 py-1"><i class="bi bi-person me-1"></i> {{ log.user.username }}</span>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6" class="text-center py-5 text-secondary">
+                    <div class="bg-secondary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="bi bi-journal-x fs-1 opacity-50 text-secondary"></i>
+                    </div>
+                    <h5 class="fw-bold text-white mb-2">No audit logs found</h5>
+                    <p>Stock movements will automatically appear here once activity occurs.</p>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

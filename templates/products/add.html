@@ -1,0 +1,85 @@
+{% extends "layout.html" %}
+
+{% block page_title %}Add New Product{% endblock %}
+{% block page_subtitle %}Register a new item into the inventory system{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="glass-card p-5 border-0 shadow-lg">
+            <form method="POST" action="{{ url_for('products.add') }}">
+                
+                <div class="d-flex align-items-center mb-4">
+                    <div class="bg-primary bg-opacity-25 rounded p-2 me-3 d-flex align-items-center justify-content-center text-primary" style="width: 40px; height: 40px;">
+                        <i class="bi bi-info-circle fs-5"></i>
+                    </div>
+                    <h5 class="fw-bold mb-0">Basic Information</h5>
+                </div>
+                
+                <div class="row g-4 mb-5">
+                    <div class="col-md-12">
+                        <label class="form-label text-secondary small text-uppercase fw-bold mb-1" style="letter-spacing: 1px;">Product Name</label>
+                        <input type="text" name="name" class="form-control premium-input shadow-sm" required placeholder="Enter product name">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-secondary small text-uppercase fw-bold mb-1" style="letter-spacing: 1px;">Category</label>
+                        <select name="category_id" class="form-select premium-input shadow-sm text-white" style="background-color: rgba(15, 23, 42, 0.6);">
+                            <option value="" class="text-dark">Select Category</option>
+                            {% for cat in categories %}
+                                <option value="{{ cat.id }}" class="text-dark">{{ cat.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-secondary small text-uppercase fw-bold mb-1" style="letter-spacing: 1px;">Supplier</label>
+                        <select name="supplier_id" class="form-select premium-input shadow-sm text-white" style="background-color: rgba(15, 23, 42, 0.6);">
+                            <option value="" class="text-dark">Select Supplier</option>
+                            {% for sup in suppliers %}
+                                <option value="{{ sup.id }}" class="text-dark">{{ sup.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center mb-4 mt-2">
+                    <div class="bg-success bg-opacity-25 rounded p-2 me-3 d-flex align-items-center justify-content-center text-success" style="width: 40px; height: 40px;">
+                        <i class="bi bi-tags fs-5"></i>
+                    </div>
+                    <h5 class="fw-bold mb-0">Pricing & Inventory</h5>
+                </div>
+                
+                <div class="row g-4 mb-5">
+                    <div class="col-md-4">
+                        <label class="form-label text-secondary small text-uppercase fw-bold mb-1" style="letter-spacing: 1px;">Base Price</label>
+                        <div class="input-group shadow-sm">
+                            <span class="input-group-text bg-transparent border-end-0 premium-input text-secondary" style="background: rgba(15, 23, 42, 0.6) !important;">$</span>
+                            <input type="number" step="0.01" name="base_price" class="form-control premium-input border-start-0 ps-0" required placeholder="0.00" style="background: rgba(15, 23, 42, 0.6) !important;">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-secondary small text-uppercase fw-bold mb-1" style="letter-spacing: 1px;">Initial Stock</label>
+                        <input type="number" name="available_stock" class="form-control premium-input shadow-sm" value="0">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-secondary small text-uppercase fw-bold mb-1" style="letter-spacing: 1px;">Min Threshold</label>
+                        <div class="input-group shadow-sm">
+                            <input type="number" name="minimum_threshold" class="form-control premium-input border-end-0" value="10" style="background: rgba(15, 23, 42, 0.6) !important;">
+                            <span class="input-group-text bg-transparent border-start-0 premium-input text-warning" style="background: rgba(15, 23, 42, 0.6) !important;" title="Alert me when stock falls below this number">
+                                <i class="bi bi-bell-fill"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex justify-content-end gap-3 mt-4 pt-4 border-top border-secondary border-opacity-50">
+                    <a href="{{ url_for('products.index') }}" class="btn btn-outline-secondary text-white px-4">Cancel</a>
+                    <button type="submit" class="btn premium-btn px-5 shadow">
+                        <i class="bi bi-check2 me-1"></i> Save Product
+                    </button>
+                </div>
+                
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

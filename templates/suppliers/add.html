@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+
+{% block page_title %}Add New Supplier{% endblock %}
+{% block page_subtitle %}Register a new vendor into the system{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="glass-card p-5 border-0 shadow-lg">
+            <form method="POST" action="{{ url_for('suppliers.add') }}">
+                
+                <div class="d-flex align-items-center mb-4">
+                    <div class="bg-primary bg-opacity-25 rounded p-2 me-3 d-flex align-items-center justify-content-center text-primary" style="width: 40px; height: 40px;">
+                        <i class="bi bi-building fs-5"></i>
+                    </div>
+                    <h5 class="fw-bold mb-0">Supplier Details</h5>
+                </div>
+                
+                <div class="row g-4 mb-5">
+                    <div class="col-md-12">
+                        <label class="form-label text-secondary small text-uppercase fw-bold mb-1" style="letter-spacing: 1px;">Supplier Name or Company</label>
+                        <input type="text" name="name" class="form-control premium-input shadow-sm" required placeholder="Enter company name">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-secondary small text-uppercase fw-bold mb-1" style="letter-spacing: 1px;">Email Address</label>
+                        <input type="email" name="contact_email" class="form-control premium-input shadow-sm" placeholder="contact@supplier.com">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-secondary small text-uppercase fw-bold mb-1" style="letter-spacing: 1px;">Phone Number</label>
+                        <input type="text" name="contact_phone" class="form-control premium-input shadow-sm" placeholder="+1 (555) 000-0000">
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label text-secondary small text-uppercase fw-bold mb-1" style="letter-spacing: 1px;">Physical Address</label>
+                        <textarea name="address" class="form-control premium-input shadow-sm" rows="3" placeholder="Enter physical or billing address"></textarea>
+                    </div>
+                </div>
+                
+                <div class="d-flex justify-content-end gap-3 mt-4 pt-4 border-top border-secondary border-opacity-50">
+                    <a href="{{ url_for('suppliers.index') }}" class="btn btn-outline-secondary text-white px-4">Cancel</a>
+                    <button type="submit" class="btn premium-btn px-5 shadow">
+                        <i class="bi bi-check2 me-1"></i> Save Supplier
+                    </button>
+                </div>
+                
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

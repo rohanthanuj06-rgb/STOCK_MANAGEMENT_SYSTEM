@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block body %}
+<!-- Sidebar -->
+<div class="sidebar d-flex flex-column p-3">
+    <a href="{{ url_for('dashboard.index') }}" class="d-flex align-items-center mb-4 me-md-auto text-white text-decoration-none">
+        <div class="bg-primary rounded p-2 me-2 shadow-sm" style="background: linear-gradient(135deg, var(--primary-color), #3b82f6) !important;">
+            <i class="bi bi-box-seam fs-5 text-white"></i>
+        </div>
+        <span class="fs-5 fw-bold" style="letter-spacing: 0.5px;">StockPro</span>
+    </a>
+    
+    <ul class="nav nav-pills flex-column mb-auto gap-1">
+        <li class="nav-item">
+            <a href="{{ url_for('dashboard.index') }}" class="nav-link {% if request.endpoint == 'dashboard.index' %}active{% endif %}">
+                <i class="bi bi-speedometer2"></i> Dashboard
+            </a>
+        </li>
+        <li>
+            <a href="{{ url_for('products.index') }}" class="nav-link {% if request.endpoint and request.endpoint.startswith('products.') %}active{% endif %}">
+                <i class="bi bi-box"></i> Products
+            </a>
+        </li>
+        <li>
+            <a href="{{ url_for('sales.index') }}" class="nav-link {% if request.endpoint and request.endpoint.startswith('sales.') %}active{% endif %}">
+                <i class="bi bi-cart"></i> Sales
+            </a>
+        </li>
+        <li>
+            <a href="{{ url_for('purchases.index') }}" class="nav-link {% if request.endpoint and request.endpoint.startswith('purchases.') %}active{% endif %}">
+                <i class="bi bi-truck"></i> Purchases
+            </a>
+        </li>
+        <li>
+            <a href="{{ url_for('suppliers.index') }}" class="nav-link {% if request.endpoint and request.endpoint.startswith('suppliers.') %}active{% endif %}">
+                <i class="bi bi-people"></i> Suppliers
+            </a>
+        </li>
+        {% if current_user.role == 'Admin' %}
+        <li>
+            <a href="{{ url_for('audit.index') }}" class="nav-link {% if request.endpoint and request.endpoint.startswith('audit.') %}active{% endif %}">
+                <i class="bi bi-journal-text"></i> Audit Logs
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+    
+    <!-- Roles Documentation Area -->
+    <div class="mt-auto pt-3 px-2">
+        <a href="#" class="nav-link py-2 px-3 border border-secondary border-opacity-25 rounded-3 d-flex justify-content-between align-items-center bg-dark bg-opacity-25" style="font-size: 0.9rem;" data-bs-toggle="modal" data-bs-target="#rolesModal">
+            <span class="d-flex align-items-center gap-2"><i class="bi bi-shield-lock text-info"></i> System Roles</span>
+            <i class="bi bi-info-circle"></i>
+        </a>
+    </div>
+
+    <div class="mt-3 pt-3 border-top border-secondary opacity-75">
+        <div class="dropdown">
+            <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle p-2 rounded hover-bg-glass" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false" style="transition: all 0.3s;">
+                <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 35px; height: 35px;">
+                    <i class="bi bi-person-fill text-dark"></i>
+                </div>
+                <div>
+                    <strong class="d-block lh-1">{{ current_user.username }}</strong>
+                    <small class="text-secondary">{{ current_user.role }}</small>
+                </div>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-dark text-small shadow glass-card border-0" aria-labelledby="dropdownUser1">
+                <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profile</a></li>
+                <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Settings</a></li>
+                <li><hr class="dropdown-divider bg-secondary"></li>
+                <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Sign out</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+    <div class="topbar rounded-3 mb-4 d-flex justify-content-between align-items-center shadow-sm">
+        <div>
+            <h4 class="mb-0 fw-bold">{% block page_title %}Dashboard{% endblock %}</h4>
+            <small class="text-secondary">{% block page_subtitle %}Welcome back, {{ current_user.username }}{% endblock %}</small>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+            <div id="themeToggleBtn" class="position-relative cursor-pointer p-2 rounded-circle hover-bg-glass" style="transition: all 0.2s; cursor: pointer;">
+                <i class="bi bi-moon-stars fs-5 text-secondary" id="themeIcon"></i>
+            </div>
+            
+            <div class="position-relative cursor-pointer p-2 rounded-circle hover-bg-glass" style="transition: all 0.2s;">
+                <i class="bi bi-bell fs-5 text-secondary"></i>
+                <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-dark rounded-circle mt-1 ms-n1">
+                    <span class="visually-hidden">New alerts</span>
+                </span>
+            </div>
+        </div>
+    </div>
+    
+    {% block content %}{% endblock %}
+</div>
+
+<!-- Theme Toggler Logic -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const themeBtn = document.getElementById('themeToggleBtn');
+        const themeIcon = document.getElementById('themeIcon');
+        
+        const updateIcon = () => {
+            if (document.documentElement.getAttribute('data-theme') === 'light') {
+                themeIcon.classList.remove('bi-moon-stars');
+                themeIcon.classList.add('bi-sun');
+                themeIcon.classList.add('text-warning');
+            } else {
+                themeIcon.classList.remove('bi-sun', 'text-warning');
+                themeIcon.classList.add('bi-moon-stars');
+            }
+        };
+
+        updateIcon();
+
+        themeBtn.addEventListener('click', () => {
+            let currentTheme = document.documentElement.getAttribute('data-theme');
+            let newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateIcon();
+            
+            // Dispatch event for charts to update
+            window.dispatchEvent(new Event('themeChanged'));
+        });
+    });
+</script>
+
+<!-- Roles Explanation Modal -->
+<div class="modal fade" id="rolesModal" tabindex="-1" aria-labelledby="rolesModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content glass-card border-0 shadow-lg text-white" style="background: rgba(15, 23, 42, 0.9);">
+      <div class="modal-header border-bottom border-secondary border-opacity-25">
+        <h5 class="modal-title fw-bold" id="rolesModalLabel">
+            <i class="bi bi-shield-check text-info me-2"></i> System Access Roles
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        <div class="row g-4">
+            <!-- Admin -->
+            <div class="col-md-4">
+                <div class="p-4 rounded-3 h-100" style="background: rgba(79, 70, 229, 0.1); border: 1px solid rgba(79, 70, 229, 0.2);">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="p-2 rounded bg-primary bg-opacity-25 me-3"><i class="bi bi-lightning-charge text-primary fs-5"></i></div>
+                        <h5 class="fw-bold mb-0">Admin</h5>
+                    </div>
+                    <p class="small text-secondary mb-3">Maximum authority. Full control over the entire system layer.</p>
+                    <ul class="small text-secondary ps-3 mb-0" style="line-height: 1.6;">
+                        <li>Access highly sensitive <strong>Stock Audit Logs</strong></li>
+                        <li>Overrule system stock numbers natively</li>
+                        <li>Manage Users & Configurations</li>
+                        <li>Access all Manager & Sales functions</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Manager -->
+            <div class="col-md-4">
+                <div class="p-4 rounded-3 h-100" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2);">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="p-2 rounded bg-success bg-opacity-25 me-3"><i class="bi bi-briefcase text-success fs-5"></i></div>
+                        <h5 class="fw-bold mb-0">Manager</h5>
+                    </div>
+                    <p class="small text-secondary mb-3">Logistical control. Responsible for inventory flow mapping.</p>
+                    <ul class="small text-secondary ps-3 mb-0" style="line-height: 1.6;">
+                        <li>Create & Process <strong>Purchase Orders</strong></li>
+                        <li>Onboard & Manage <strong>Suppliers</strong></li>
+                        <li>Add/Edit/Delete Categories & <strong>Products</strong></li>
+                        <li>Access all Sales level functions</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Staff -->
+            <div class="col-md-4">
+                <div class="p-4 rounded-3 h-100" style="background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.2);">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="p-2 rounded bg-info bg-opacity-25 me-3"><i class="bi bi-cart text-info fs-5"></i></div>
+                        <h5 class="fw-bold mb-0">Sales (Staff)</h5>
+                    </div>
+                    <p class="small text-secondary mb-3">Standard operational access to facilitate day-to-day trading.</p>
+                    <ul class="small text-secondary ps-3 mb-0" style="line-height: 1.6;">
+                        <li>Create & Process <strong>Customer Sales Orders</strong></li>
+                        <li>Print Customer <strong>Invoices</strong> securely</li>
+                        <li>View Advanced Analytics Dashboard</li>
+                        <li>View <strong>Products & Live Inventory</strong></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

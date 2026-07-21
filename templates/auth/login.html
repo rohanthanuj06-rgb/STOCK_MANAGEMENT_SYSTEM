@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block body %}
+<div class="container d-flex justify-content-center align-items-center min-vh-100">
+    <div class="glass-card p-5 shadow-lg" style="width: 100%; max-width: 450px;">
+        <div class="text-center mb-5">
+            <div class="d-inline-flex align-items-center justify-content-center bg-primary rounded-circle mb-3 shadow" style="width: 60px; height: 60px; background: linear-gradient(135deg, var(--primary-color), #3b82f6) !important;">
+                <i class="bi bi-box-seam text-white fs-3"></i>
+            </div>
+            <h2 class="fw-bold mb-2">Welcome Back</h2>
+            <p class="text-secondary">Sign in to Stock Manager Pro</p>
+        </div>
+        
+        <form method="POST" action="{{ url_for('auth.login') }}">
+            
+            <div class="mb-4 position-relative">
+                <label for="username" class="form-label text-secondary small text-uppercase fw-bold mb-1" style="letter-spacing: 1px;">Username</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-0 text-secondary" style="position: absolute; z-index: 10; padding-left: 15px; top: 50%; transform: translateY(-50%);">
+                        <i class="bi bi-person"></i>
+                    </span>
+                    <input type="text" class="form-control premium-input" style="padding-left: 40px;" id="username" name="username" required autocomplete="off" placeholder="Enter your username">
+                </div>
+            </div>
+            
+            <div class="mb-5 position-relative">
+                <label for="password" class="form-label text-secondary small text-uppercase fw-bold mb-1" style="letter-spacing: 1px;">Password</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-0 text-secondary" style="position: absolute; z-index: 10; padding-left: 15px; top: 50%; transform: translateY(-50%);">
+                        <i class="bi bi-lock"></i>
+                    </span>
+                    <input type="password" class="form-control premium-input" style="padding-left: 40px;" id="password" name="password" required placeholder="Enter your password">
+                </div>
+            </div>
+            
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn premium-btn btn-lg shadow">Sign In</button>
+            </div>
+        </form>
+        <div class="text-center mt-4">
+            <small class="text-secondary">Protected by advanced security</small>
+        </div>
+    </div>
+</div>
+{% endblock %}
